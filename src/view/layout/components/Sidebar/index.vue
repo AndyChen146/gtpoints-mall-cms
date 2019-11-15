@@ -3,7 +3,7 @@
         <el-menu
             mode="vertical"
             :show-timeout="200"
-            :default-active="$route.path"
+            :default-active="routePath"
             :collapse="isCollapse"
             background-color="#304156"
             text-color="#bfcbd9"
@@ -30,6 +30,10 @@ export default {
         },
         isCollapse() {
             return !this.sidebar.opened;
+        },
+        routePath() {
+            console.log(this.$route.path);
+            return this.$route.path;
         }
     }
 };

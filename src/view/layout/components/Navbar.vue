@@ -8,7 +8,8 @@
         <Breadcrumb></Breadcrumb>
         <el-dropdown class="avatar-container" trigger="click">
             <div class="avatar-wrapper">
-                <img :src="avatar" alt class="user-avatar" />
+                <!-- <img :src="avatar" alt class="user-avatar" /> -->
+                <img src="@/assets/tx.png" alt class="user-avatar" />
                 <i class="el-icon-caret-bottom"></i>
             </div>
             <el-dropdown-menu class="user-dropdown" slot="dropdown">
@@ -39,7 +40,9 @@ export default {
         TogglesSideBar() {
             this.$store.dispatch("TogglesSideBar");
         },
-        logout() {}
+        logout() {
+            this.$router.push("/login");
+        }
     }
 };
 </script>

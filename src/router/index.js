@@ -44,7 +44,7 @@ import usersRecharge from '@/view/user/recharge.vue'
 
 //广告
 import adList from '@/view/ad/index.vue'
-import adType from '@/view/ad/type.vue'
+import adDetail from '@/view/ad/detail.vue'
 
 //营销-积分夺宝
 import marketStoreList from '@/view/market/store/index.vue'
@@ -120,7 +120,7 @@ const router = new Router({
                 {
                     path: 'product/add',
                     name: 'goodsUpdate',
-                    meta: { title: '添加商品', icon: 'product-list' },
+                    meta: { title: '添加商品', icon: 'product-add' },
                     component: goodsUpdate,
                 },
                 {
@@ -133,19 +133,19 @@ const router = new Router({
                     path: 'proattr/update',
                     name: 'categoryUpdate',
                     hidden: true,
-                    meta: { title: '添加商品分类' },
+                    meta: { title: '添加/编辑商品分类' },
                     component: categoryUpdate,
                 },
                 {
                     path: 'brand',
                     name: 'brandList',
-                    meta: { title: '品牌列表', icon: 'product-brand' },
+                    meta: { title: '商品品牌', icon: 'product-brand' },
                     component: brandList,
                 },
                 {
                     path: 'brand/update',
                     name: 'brandUpdate',
-                    meta: { title: '编辑品牌' },
+                    meta: { title: '新增/编辑品牌' },
                     hidden: true,
                     component: brandUpdate,
                 },
@@ -156,7 +156,7 @@ const router = new Router({
                     meta: { title: '商品类型', icon: 'product-attr' }
                 },
                 {
-                    path: 'proattr/list',
+                    path: 'proattr/index/attr',
                     name: 'protypeAttr',
                     hidden: true,
                     component: protypeAttr,
@@ -198,7 +198,7 @@ const router = new Router({
             component: Layout,
             redirect: '/ums/index',
             name: 'ums',
-            meta: { title: '用户管理', icon: 'order' },
+            meta: { title: '用户管理', icon: 'user' },
             children: [
                 {
                     path: 'index',
@@ -207,9 +207,9 @@ const router = new Router({
                     component: usersList
                 },
                 {
-                    path: 'index',
+                    path: 'recharge',
                     name: 'usersRecharge',
-                    meta: { title: '充值记录', icon: 'product-list' },
+                    meta: { title: '充值记录', icon: 'user-recharge' },
                     component: usersRecharge
                 },
                 {
@@ -218,27 +218,6 @@ const router = new Router({
                     meta: { title: '用户详情' },
                     hidden: true,
                     component: userDetail
-                }
-            ]
-        },
-        {
-            path: '/ad',
-            name: 'ad',
-            component: Layout,
-            meta: { title: '广告管理', icon: 'sms' },
-            redirect: '/ad/index',
-            children: [
-                {
-                    path: 'index',
-                    name: 'adList',
-                    meta: { title: '广告列表', icon: 'product-list' },
-                    component: adList
-                },
-                {
-                    path: 'type',
-                    name: 'adType',
-                    meta: { title: '广告分类', icon: 'product-list' },
-                    component: adType
                 }
             ]
         },
@@ -252,20 +231,19 @@ const router = new Router({
                 {
                     path: 'store/index',
                     name: 'marketStoreList',
-                    meta: { title: '积分夺宝', icon: 'sms-flash' },
-                    component: marketStoreList
+                    meta: { title: '积分夺宝列表', icon: 'market-store' },
+                    component: marketStoreList,
                 },
                 {
-                    path: 'store/type',
+                    path: 'store/types',
                     name: 'marketStoreType',
-                    meta: { title: '积分夺宝分类' },
-                    hidden: true,
+                    meta: { title: '积分夺宝分类', icon: 'product-cate' },
                     component: marketStoreType
                 },
                 {
                     path: 'panic/index',
                     name: 'marketPanicList',
-                    meta: { title: '限时免费抢购', icon: 'sms-flash' },
+                    meta: { title: '限时免费抢购', icon: 'market-panic' },
                     component: marketPanicList
                 },
                 {
@@ -276,9 +254,22 @@ const router = new Router({
                     component: marketPanicInfo
                 },
                 {
+                    path: 'ad/index',
+                    name: 'adList',
+                    meta: { title: '广告列表', icon: 'product-list' },
+                    component: adList
+                },
+                {
+                    path: 'ad/index/detail',
+                    name: 'adDetail',
+                    meta: { title: '广告详情' },
+                    hidden: true,
+                    component: adDetail
+                },
+                {
                     path: 'markblue/index',
                     name: 'marketBluePrintList',
-                    meta: { title: '幸福晒图区', icon: 'sms-flash' },
+                    meta: { title: '幸福晒图区', icon: 'arketBlue' },
                     component: marketBluePrintList
                 },
                 {

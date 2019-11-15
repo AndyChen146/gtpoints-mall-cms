@@ -34,12 +34,12 @@ module.exports = {
         port: 8080,            //监听请求的端口号
         https: false,          //是否采用https访问  默认http
         hotOnly: false,        //是否启用模块热替换
-        //proxy: {               //设置代理
-        // '/api': {
-        //     target: 'http://www.xxx.com',
-        //     secure: false  //如果采用https
-        // }
-        //},
+        proxy: {               //设置代理
+            '/api': {
+                target: 'http://47.106.148.93:8106',
+                secure: false  //如果采用https
+            }
+        },
         before: app => { }
     }
 }

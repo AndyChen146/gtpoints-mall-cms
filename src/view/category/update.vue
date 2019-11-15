@@ -1,15 +1,17 @@
 <template>
-    <div></div>
+    <product-cate-detail :is-edit="edit"></product-cate-detail>
 </template>
 <script>
+import ProductCateDetail from "./components/tk";
 export default {
-    name: "",
+    name: "updateProductCate",
+    components: { ProductCateDetail },
     data() {
-        return {};
-    },
-    created() {},
-    methods: {}
+        return {
+            edit: true
+        };
+    }
 };
 </script>
-<style lang="scss" scoped>
+<style>
 </style>

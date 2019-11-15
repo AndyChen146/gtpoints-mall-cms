@@ -16,7 +16,7 @@ const vaxios = axios.create({
 //request 拦截器，判断vuex是否有token
 vaxios.interceptors.request.use(config => {
     if (store.getters.token) {
-        config.headers['Author'] = getToken()
+        config.headers['x-token'] = getToken()
     }
     return config;
 }, error => {
@@ -25,13 +25,13 @@ vaxios.interceptors.request.use(config => {
 })
 
 //response 拦截器
-service.interceptors.response.use(response => {
-    const res = response.data
-    if (res.code !== 200) {
+vaxios.interceptors.response.use(response => {
+    const res = response.data;
+    if (res.code != 0) {
         Message({
-            message: res.message,
+            message: res.msg,
             type: 'error',
-            duration: 3 * 1000
+            duration: 2 * 1000
         })
         // 判断是否未登录
         if (res.code === 401 || res.code === 403) {
@@ -49,9 +49,9 @@ service.interceptors.response.use(response => {
     }
 }, error => {
     Message({
-        message: error.message,
+        message: error.msg,
         type: 'error',
-        duration: 3 * 1000
+        duration: 2 * 1000
     })
     return Promise.reject(error)
 })

@@ -2,7 +2,7 @@
     <div class="login_wrap">
         <div class="login_bj">
             <!-- <img class="header_logo" src="@/assets/images/logo.png" /> -->
-            <p class="header_title">商城后台管理系统</p>
+            <p class="header_title">广踏积分商城后台管理系统</p>
         </div>
         <div class="login_box">
             <div class="left_box">
@@ -20,7 +20,7 @@
                             name="username"
                             type="text"
                             v-model="loginForm.username"
-                            autocomplete="on"
+                            autocomplete="off"
                             placeholder="请输入用户名"
                         >
                             <span slot="prefix">
@@ -34,7 +34,7 @@
                             :type="pwdType"
                             @keyup.enter.native="handleLogin"
                             v-model="loginForm.password"
-                            autocomplete="on"
+                            autocomplete="off"
                             placeholder="请输入密码"
                         >
                             <span slot="prefix">
@@ -59,9 +59,84 @@
     </div>
 </template>
 <script>
-import login from "./login.js";
+import { loginBtn } from "@/api/login";
+import hex_md5 from "js-md5";
 export default {
-    ...login
+    name: "login",
+    data() {
+        const validateUsername = (rule, value, callback) => {
+            if (value == "") {
+                callback(new Error("请输入正确的用户名"));
+            } else {
+                callback();
+            }
+        };
+        const validatePass = (rule, value, callback) => {
+            if (value.length < 5) {
+                callback(new Error("密码不能小于5位"));
+            } else {
+                callback();
+            }
+        };
+        return {
+            arrs: [1, 2, 3, 4, 5, 6],
+            loginForm: {
+                username: "super",
+                password: "admin"
+            },
+            loginRules: {
+                username: [
+                    {
+                        required: true,
+                        trigger: "blur",
+                        validator: validateUsername
+                    }
+                ],
+                password: [
+                    {
+                        required: true,
+                        trigger: "blur",
+                        validator: validatePass
+                    }
+                ]
+            },
+            loading: false,
+            pwdType: "password"
+        };
+    },
+    methods: {
+        showPwd() {
+            if (this.pwdType === "password") {
+                this.pwdType = "";
+            } else {
+                this.pwdType = "password";
+            }
+        },
+        handleLogin() {
+            this.$refs.loginForm.validate(valid => {
+                if (valid) {
+                    let username = this.loginForm.username;
+                    let password = hex_md5(this.loginForm.password);
+                    this.loginSubmit(username, password);
+                } else {
+                    return false;
+                }
+            });
+        },
+        //ajax接口登录
+        loginSubmit(username, password) {
+            loginBtn({
+                username: username,
+                password: password
+            })
+                .then(res => {
+                    this.$router.push("/home");
+                })
+                .catch(err => {
+                    //console.log(err);
+                });
+        }
+    }
 };
 </script>
 <style lang="scss" src="./login.scss" scoped></style>
