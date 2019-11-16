@@ -16,10 +16,10 @@
                 <el-table-column label="编号" width="100" align="center">
                     <template slot-scope="scope">{{scope.row.spec_id}}</template>
                 </el-table-column>
-                <el-table-column label="类型名称" width="160" align="center">
+                <el-table-column label="规格名称" width="160" align="center">
                     <template slot-scope="scope">{{scope.row.name}}</template>
                 </el-table-column>
-                <el-table-column label="属性标签" width="340" align="center">
+                <el-table-column label="规格属性" width="340" align="center">
                     <template slot-scope="scope">{{scope.row.spec_value_name}}</template>
                 </el-table-column>
                 <el-table-column label="排序" width="120" align="center">
@@ -62,7 +62,7 @@
     </div>
 </template>
 <script>
-import { getProtypeList, updateProtype } from "@/api/protype";
+import { getFormatList, updateFormat } from "@/api/format";
 export default {
     name: "",
     data() {
@@ -82,14 +82,14 @@ export default {
     methods: {
         //初始化商品规格列表
         getList() {
-            getProtypeList(this.listQuery).then(res => {
+            getFormatList(this.listQuery).then(res => {
                 this.total = res.data.total;
                 this.list = res.data.list;
             });
         },
         //添加
         addformat() {
-            this.$router.push("/pms/protype/update");
+            this.$router.push("/pms/format/update");
         },
         //size 选择
         handleSizeChange(val) {
@@ -104,7 +104,7 @@ export default {
         },
         //是否启用
         handleShowStatusChange(index, row) {
-            updateProtype({
+            updateFormat({
                 items: row.spec_value_name,
                 name: row.name,
                 spec_id: row.spec_id,
@@ -119,7 +119,7 @@ export default {
         },
         //编辑
         handleUpdate(index, row) {
-            this.$router.push("/pms/protype/update?id=" + row.spec_id);
+            this.$router.push("/pms/format/update?id=" + row.spec_id);
         },
         //删除
         handleDelete(index, row) {}

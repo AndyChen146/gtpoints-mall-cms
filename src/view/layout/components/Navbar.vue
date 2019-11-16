@@ -41,7 +41,9 @@ export default {
             this.$store.dispatch("TogglesSideBar");
         },
         logout() {
-            this.$router.push("/login");
+            this.$store.dispatch("LogOut").then(() => {
+                this.$router.push("/login");
+            });
         }
     }
 };

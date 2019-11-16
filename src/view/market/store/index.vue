@@ -76,7 +76,19 @@
         <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="50%">
             <el-form ref="storeCateForm" :model="storeCate" :rules="rules" label-width="120px">
                 <el-form-item label="选择类型" prop="type">
-                    <el-input v-model="storeCate.type" auto-complete="off"></el-input>
+                    <el-select
+                        v-model="storeCate.type"
+                        class="input-width"
+                        placeholder="全部"
+                        clearable
+                    >
+                        <el-option
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                        ></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="总积分" prop="total">
                     <el-input v-model="storeCate.total" auto-complete="off"></el-input>
@@ -85,7 +97,13 @@
                     <el-input v-model="storeCate.cy_num" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="开始时间" prop="start_time">
-                    <el-input v-model="storeCate.start_time" auto-complete="off"></el-input>
+                    <el-date-picker
+                        class="input-width"
+                        v-model="storeCate.start_time"
+                        value-format="yyyy-MM-dd"
+                        type="date"
+                        placeholder="请选择时间"
+                    ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="备注" prop="desc">
                     <el-input v-model="storeCate.desc" auto-complete="off"></el-input>
@@ -104,6 +122,48 @@
                 <el-button @click="dialogVisible = false">取 消</el-button>
                 <el-button type="primary" @click="handleConfirm('productAttrCatForm')">确 定</el-button>
             </span>
+        </el-dialog>
+
+        <el-dialog title="选择商品" :visible.sync="selectDialogVisible" width="50%">
+            <el-input
+                v-model="dialogData.listQuery.keyword"
+                style="width: 250px;margin-bottom: 20px"
+                size="small"
+                placeholder="商品名称搜索"
+            >
+                <el-button slot="append" icon="el-icon-search" @click="handleSelectSearch()"></el-button>
+            </el-input>
+            <el-table
+                :data="dialogData.list"
+                @selection-change="handleDialogSelectionChange"
+                border
+            >
+                <el-table-column type="selection" width="60" align="center"></el-table-column>
+                <el-table-column label="商品名称" align="center">
+                    <template slot-scope="scope">{{scope.row.name}}</template>
+                </el-table-column>
+                <el-table-column label="货号" width="160" align="center">
+                    <template slot-scope="scope">NO.{{scope.row.productSn}}</template>
+                </el-table-column>
+                <el-table-column label="价格" width="120" align="center">
+                    <template slot-scope="scope">￥{{scope.row.price}}</template>
+                </el-table-column>
+            </el-table>
+            <div class="pagination-container">
+                <el-pagination
+                    background
+                    @current-change="handleDialogCurrentChange"
+                    layout="prev, pager, next"
+                    :current-page.sync="dialogData.listQuery.pageNum"
+                    :page-size="dialogData.listQuery.pageSize"
+                    :total="dialogData.total"
+                ></el-pagination>
+            </div>
+            <div style="clear: both;"></div>
+            <div slot="footer">
+                <el-button size="small" @click="selectDialogVisible = false">取 消</el-button>
+                <el-button size="small" type="primary" @click="handleSelectDialogConfirm()">确 定</el-button>
+            </div>
         </el-dialog>
     </div>
 </template>
@@ -129,6 +189,33 @@ export default {
                     mucy_num: 2000,
                     status: 1,
                     desc: ""
+                }
+            ],
+            selectDialogVisible: false,
+            dialogData: {
+                list: [
+                    {
+                        name: "商品名称",
+                        productSn: "2839123",
+                        price: "123.00"
+                    }
+                ],
+                total: 10,
+                multipleSelection: [],
+                listQuery: {
+                    keyword: null,
+                    pageNum: 1,
+                    pageSize: 5
+                }
+            },
+            statusOptions: [
+                {
+                    value: "一",
+                    label: 1
+                },
+                {
+                    value: "一",
+                    label: 1
                 }
             ],
             rules: {},
@@ -160,7 +247,9 @@ export default {
             this.storeCate.id = row.id;
         },
         //选择商品
-        selectGoodsList(index, row) {},
+        selectGoodsList(index, row) {
+            this.selectDialogVisible = true;
+        },
         //删除
         handleDelete(index, row) {},
         //是否显示状态切换
@@ -180,6 +269,17 @@ export default {
                 } else {
                 }
             });
+        },
+        //选择商品中的搜索
+        handleSelectSearch() {},
+        handleDialogSelectionChange(val) {
+            this.dialogData.multipleSelection = val;
+        },
+        //选择商品中的确定
+        handleSelectDialogConfirm() {},
+        //选择商品中页码翻页
+        handleDialogCurrentChange(val) {
+            console.log(val);
         }
     }
 };

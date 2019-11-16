@@ -5,7 +5,7 @@
 
 import Cookies from 'js-cookie'
 
-const TokenKey = 'loginToken'
+const TokenKey = 'x-token'
 
 //获取token
 export function getToken() {

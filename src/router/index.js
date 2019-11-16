@@ -28,9 +28,13 @@ import categoryUpdate from '@/view/category/update.vue'
 import brandList from '@/view/brands/index.vue'
 import brandUpdate from '@/view/brands/update.vue'
 
+//商品规格
+import formatList from '@/view/format/index.vue'
+import formatDetail from '@/view/format/detail.vue'
+
 //商品类型
 import protypeList from '@/view/protype/index.vue'
-import protypeAttr from '@/view/protype/attr.vue'
+import protypeDetail from '@/view/protype/detail.vue'
 
 //订单
 import orderList from '@/view/order/index.vue'
@@ -148,19 +152,34 @@ const router = new Router({
                     meta: { title: '新增/编辑品牌' },
                     hidden: true,
                     component: brandUpdate,
+
                 },
                 {
-                    path: 'proattr/index',
+                    path: 'format',
+                    name: 'formatList',
+                    meta: { title: '商品规格', icon: 'product-format' },
+                    component: formatList,
+                },
+                {
+                    path: 'format/update',
+                    name: 'formatDetail',
+                    meta: { title: '新增/编辑规格' },
+                    hidden: true,
+                    component: formatDetail,
+
+                },
+                {
+                    path: 'protype',
                     name: 'protypeList',
                     component: protypeList,
                     meta: { title: '商品类型', icon: 'product-attr' }
                 },
                 {
-                    path: 'proattr/index/attr',
-                    name: 'protypeAttr',
+                    path: 'protype/update',
+                    name: 'protypeDetail',
                     hidden: true,
-                    component: protypeAttr,
-                    meta: { title: '商品属性列表' }
+                    component: protypeDetail,
+                    meta: { title: '新增/编辑类型' }
                 },
             ]
         },
@@ -273,7 +292,7 @@ const router = new Router({
                     component: marketBluePrintList
                 },
                 {
-                    path: 'markblue/info',
+                    path: 'markblue/index/info',
                     name: 'marketBluePrintInfo',
                     meta: { title: '幸福晒图区详情' },
                     hidden: true,

@@ -1,19 +1,17 @@
 <template>
     <el-card class="form-container" shadow="never">
         <el-form :model="brand" :rules="rules" ref="brandFrom" label-width="150px">
-            <el-form-item label="品牌名称：" prop="name">
+            <el-form-item label="规格名称：" prop="name">
                 <el-input v-model="brand.name"></el-input>
             </el-form-item>
-            <el-form-item label="品牌LOGO：" prop="picture">
-                <single-upload v-model="brand.picture" cate="icon"></single-upload>
-            </el-form-item>
-            <el-form-item label="排序：" prop="sort">
+            <el-form-item label="规格排序：" prop="sort">
                 <el-input v-model.number="brand.sort"></el-input>
             </el-form-item>
-            <el-form-item label="是否推荐：">
-                <el-radio-group v-model="brand.is_recommend">
-                    <el-radio :label="1">是</el-radio>
-                    <el-radio :label="0">否</el-radio>
+            <el-form-item label="展示方式：">
+                <el-radio-group v-model="brand.show_type">
+                    <el-radio :label="1">文字</el-radio>
+                    <el-radio :label="2">颜色</el-radio>
+                    <el-radio :label="3">图片</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="是否显示：">
@@ -22,8 +20,12 @@
                     <el-radio :label="0">否</el-radio>
                 </el-radio-group>
             </el-form-item>
-            <el-form-item label="描述：" prop="description">
-                <el-input v-model.number="brand.description"></el-input>
+            <el-form-item label="规格值：" prop="items">
+                <el-input v-model.number="brand.items"></el-input>
+                <span style="margin-left:10px;font-size:12px;color:#999">多个以,分隔</span>
+            </el-form-item>
+            <el-form-item label="规格说明：" prop="spec_des">
+                <el-input v-model.number="brand.spec_des"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onSubmit('brandFrom')">提交</el-button>
@@ -33,11 +35,9 @@
     </el-card>
 </template>
 <script>
-import SingleUpload from "@/components/util/Upload/singleUpload";
-import { updateBrands, getBrandsInfo } from "@/api/brand";
+import { getFormatInfo, updateFormat } from "@/api/format";
 export default {
-    name: "BrandDetail",
-    components: { SingleUpload },
+    name: "formatDetail",
     props: {
         isEdit: {
             type: Boolean,
@@ -47,9 +47,9 @@ export default {
     data() {
         return {
             brand: {
-                picture: "",
-                description: "",
-                is_recommend: 1,
+                items: "",
+                spec_des: "",
+                show_type: 1,
                 name: "",
                 status: 1,
                 sort: ""
@@ -58,7 +58,7 @@ export default {
                 name: [
                     {
                         required: true,
-                        message: "请输入品牌名称",
+                        message: "请输入规格名称",
                         trigger: "blur"
                     },
                     {
@@ -68,10 +68,10 @@ export default {
                         trigger: "blur"
                     }
                 ],
-                picture: [
+                items: [
                     {
                         required: true,
-                        message: "请上传品牌logo",
+                        message: "请填写规格值",
                         trigger: "blur"
                     }
                 ],
@@ -88,13 +88,19 @@ export default {
     methods: {
         //获取品牌详情
         getInfo(id) {
-            getBrandsInfo({ brand_id: id }).then(res => {
-                this.brand = res.data;
+            getFormatInfo({ spec_id: id }).then(res => {
+                this.brand.name = res.data.name;
+                this.brand.show_type = res.data.show_type;
+                this.brand.sort = res.data.sort;
+                this.brand.spec_des = res.data.spec_des;
+                this.brand.spec_id = res.data.spec_id;
+                this.brand.status = res.data.status;
+                this.brand.items = res.data.spec_value_name;
             });
         },
         //取消
         resetForm() {
-            this.$router.push("/pms/brand");
+            this.$router.push("/pms/format");
         },
         //提交
         onSubmit(formName) {
@@ -107,9 +113,9 @@ export default {
         },
         //提交数据到服务端
         updateData() {
-            updateBrands(this.brand).then(res => {
+            updateFormat(this.brand).then(res => {
                 this.$message.success(res.msg);
-                this.$router.push("/pms/brand");
+                this.$router.push("/pms/format");
             });
         }
     }

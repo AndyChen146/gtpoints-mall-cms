@@ -17,6 +17,7 @@ const vaxios = axios.create({
 vaxios.interceptors.request.use(config => {
     if (store.getters.token) {
         config.headers['x-token'] = getToken()
+        config.headers['Content-Type'] = 'application/json'
     }
     return config;
 }, error => {
@@ -34,13 +35,10 @@ vaxios.interceptors.response.use(response => {
             duration: 2 * 1000
         })
         // 判断是否未登录
-        if (res.code === 401 || res.code === 403) {
-            MessageBox.confirm('你已被登出，需重新登录', '提示', {
-                confirmButtonText: '重新登录',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(() => {
-                // 跳转到登录页
+        if (res.code === 401) {
+            // 跳转到登录页
+            tore.dispatch('FedLogOut').then(() => {
+                this.$router.push("/login");
             })
         }
         return Promise.reject('error')

@@ -66,7 +66,7 @@ export default {
     data() {
         const validateUsername = (rule, value, callback) => {
             if (value == "") {
-                callback(new Error("请输入正确的用户名"));
+                callback(new Error("用户名不能为空"));
             } else {
                 callback();
             }
@@ -79,7 +79,6 @@ export default {
             }
         };
         return {
-            arrs: [1, 2, 3, 4, 5, 6],
             loginForm: {
                 username: "super",
                 password: "admin"
@@ -125,15 +124,18 @@ export default {
         },
         //ajax接口登录
         loginSubmit(username, password) {
-            loginBtn({
-                username: username,
-                password: password
-            })
-                .then(res => {
+            this.loading = true;
+            this.$store
+                .dispatch("Login", {
+                    username: username,
+                    password: password
+                })
+                .then(() => {
+                    this.loading = false;
                     this.$router.push("/home");
                 })
-                .catch(err => {
-                    //console.log(err);
+                .catch(() => {
+                    this.loading = false;
                 });
         }
     }
