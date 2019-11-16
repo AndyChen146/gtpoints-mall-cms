@@ -1,6 +1,4 @@
-<<<<<<< edc14e6aa70ff06c3b5ee0ce19f960e6b0f3198b
-# gtpoints-mall-cms
-=======
+
 # gtpoints-mall-cms
 
 ## Project setup
@@ -28,6 +26,3 @@ npm run test
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
->>>>>>> first commit
