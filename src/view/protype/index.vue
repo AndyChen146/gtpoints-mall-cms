@@ -14,25 +14,27 @@
                 border
             >
                 <el-table-column label="编号" width="100" align="center">
-                    <template slot-scope="scope">{{scope.row.spec_id}}</template>
+                    <template slot-scope="scope">{{scope.row.gt_id}}</template>
                 </el-table-column>
                 <el-table-column label="类型名称" width="160" align="center">
                     <template slot-scope="scope">{{scope.row.name}}</template>
                 </el-table-column>
                 <el-table-column label="属性标签" width="340" align="center">
-                    <template slot-scope="scope">{{scope.row.spec_value_name}}</template>
+                    <template slot-scope="scope">{{scope.row.attr_value_name}}</template>
                 </el-table-column>
                 <el-table-column label="排序" width="120" align="center">
                     <template slot-scope="scope">{{scope.row.sort}}</template>
                 </el-table-column>
-                <el-table-column label="是否启用" width="120" align="center">
+                <el-table-column label="启用状态" width="120" align="center">
                     <template slot-scope="scope">
-                        <el-switch
+                        <!-- <el-switch
                             @change="handleShowStatusChange(scope.$index, scope.row)"
                             :active-value="1"
                             :inactive-value="0"
                             v-model="scope.row.status"
-                        ></el-switch>
+                        ></el-switch>-->
+                        <span v-if="scope.row.status == 1">启用</span>
+                        <span v-if="scope.row.status == 0">未启用</span>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作" align="center">
@@ -105,7 +107,8 @@ export default {
         //是否启用
         handleShowStatusChange(index, row) {
             updateProtype({
-                items: row.spec_value_name,
+                gt_id: row.gt_id,
+                //items: row.spec_value_name,
                 name: row.name,
                 spec_id: row.spec_id,
                 status: row.status
@@ -119,7 +122,7 @@ export default {
         },
         //编辑
         handleUpdate(index, row) {
-            this.$router.push("/pms/protype/update?id=" + row.spec_id);
+            this.$router.push("/pms/protype/update?id=" + row.gt_id);
         },
         //删除
         handleDelete(index, row) {}

@@ -55,6 +55,7 @@
                                 style="width:100%"
                                 size="mini"
                                 placeholder="请选择"
+                                @change="typeChange"
                             >
                                 <el-option
                                     v-for="item in tablesTypes"
@@ -67,7 +68,12 @@
                     </el-table-column>
                     <el-table-column label="属性值" align="center">
                         <template slot-scope="scope">
-                            <el-input v-model="scope.row.values" size="mini" placeholder="多个以,分隔"></el-input>
+                            <el-input
+                                v-model="scope.row.value"
+                                v-if="scope.row.type!=1"
+                                size="mini"
+                                placeholder="多个以,分隔"
+                            ></el-input>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" width="100" align="center">
@@ -192,7 +198,7 @@ export default {
                 sort: "",
                 name: "",
                 type: 1,
-                values: ""
+                value: ""
             };
             this.tablelist.push(tables);
         },
@@ -200,15 +206,21 @@ export default {
         delItems(index) {
             this.tablelist.splice(index, 1);
         },
-        //获取品牌详情
+        //选择属性类型中的值
+        typeChange(val) {
+            //console.log(val);
+        },
+        //获取商品类型详情
         getInfo(id) {
-            getProtypeInfo({ spec_id: id }).then(res => {
-                // this.brand.name = res.data.name;
-                // this.brand.show_type = res.data.show_type;
-                // this.brand.sort = res.data.sort;
-                // this.brand.spec_des = res.data.spec_des;
-                // this.brand.spec_id = res.data.spec_id;
-                // this.brand.status = res.data.status;
+            getProtypeInfo({ gt_id: id }).then(res => {
+                this.brand.name = res.data.name;
+                this.brand.sort = res.data.sort;
+                this.brand.status = res.data.status;
+                this.brand.spec_ids = res.data.spec_ids.split(",").map(Number);
+                this.brand.brand_ids = res.data.brand_ids
+                    .split(",")
+                    .map(Number);
+                this.tablelist = res.data.items;
                 // this.brand.items = res.data.spec_value_name;
             });
         },
@@ -220,14 +232,62 @@ export default {
         onSubmit(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                    this.updateData();
+                    let brand_ids = this.brand.brand_ids.join(",");
+                    let spec_ids = this.brand.spec_ids.join(",");
+                    if (this.tablelist.length < 1) {
+                        return this.$message.error("请添加属性！");
+                    }
+                    let items_string = "";
+                    let items_array = [];
+                    this.tablelist.forEach((item, index) => {
+                        if (item.name == "") {
+                            return this.$message.error("属性名称不能为空！");
+                        }
+                        if (item.sort == "") {
+                            return this.$message.error("属性排序不能为空！");
+                        }
+                        if (item.type != 1 && item.values == "") {
+                            return this.$message.error("属性值不能为空！");
+                        }
+                        item.value = item.value == undefined ? "" : item.value;
+                        items_string =
+                            item.name +
+                            "|" +
+                            item.type +
+                            "|" +
+                            item.sort +
+                            "|" +
+                            item.value;
+                        items_array.push(items_string);
+                    });
+                    if (this.$route.query.id) {
+                        var obj = {
+                            gt_id: this.$route.query.id,
+                            items: items_array.join(";"),
+                            spec_ids: spec_ids,
+                            brand_ids: brand_ids,
+                            name: this.brand.name,
+                            status: this.brand.status,
+                            sort: this.brand.sort
+                        };
+                    } else {
+                        var obj = {
+                            items: items_array.join(";"),
+                            spec_ids: spec_ids,
+                            brand_ids: brand_ids,
+                            name: this.brand.name,
+                            status: this.brand.status,
+                            sort: this.brand.sort
+                        };
+                    }
+                    this.updateData(obj);
                 } else {
                 }
             });
         },
         //提交数据到服务端
-        updateData() {
-            updateProtype(this.brand).then(res => {
+        updateData(obj) {
+            updateProtype(obj).then(res => {
                 this.$message.success(res.msg);
                 this.$router.push("/pms/protype");
             });
