@@ -1,4 +1,4 @@
-import { str2Date } from '@/util/date'
+import { str2Date } from '@/util/datas'
 
 const DATA_FROM_BACKEND = {
     columns: ['date', 'orderCount', 'orderAmount'],

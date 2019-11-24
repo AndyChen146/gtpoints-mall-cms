@@ -18,32 +18,35 @@
             </div>
             <div style="margin-top: 15px">
                 <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
-                    <el-form-item label="广告名称：">
-                        <el-input v-model="listQuery.name" class="input-width" placeholder="广告名称"></el-input>
-                    </el-form-item>
                     <el-form-item label="广告位置：">
                         <el-select
-                            v-model="listQuery.type"
+                            v-model="listQuery.aid"
                             placeholder="全部"
                             clearable
                             class="input-width"
                         >
                             <el-option
                                 v-for="item in typeOptions"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value"
+                                :key="item.aid"
+                                :label="item.name"
+                                :value="item.aid"
                             ></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="到期时间：">
-                        <el-date-picker
+                        <el-select
+                            v-model="listQuery.status"
+                            placeholder="全部"
+                            clearable
                             class="input-width"
-                            v-model="listQuery.endTime"
-                            value-format="yyyy-MM-dd"
-                            type="date"
-                            placeholder="请选择时间"
-                        ></el-date-picker>
+                        >
+                            <el-option
+                                v-for="item in statusOptions"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id"
+                            ></el-option>
+                        </el-select>
                     </el-form-item>
                 </el-form>
             </div>
@@ -62,35 +65,28 @@
                 v-loading="listLoading"
                 border
             >
-                <el-table-column label="编号" width="120" align="center">
+                <el-table-column label="编号" width="60" align="center">
                     <template slot-scope="scope">{{scope.row.id}}</template>
                 </el-table-column>
                 <el-table-column label="广告名称" align="center">
-                    <template slot-scope="scope">{{scope.row.name}}</template>
+                    <template slot-scope="scope">{{scope.row.title}}</template>
                 </el-table-column>
-                <el-table-column label="广告位置" width="120" align="center">
-                    <template slot-scope="scope">{{scope.row.type | formatType}}</template>
+                <el-table-column label="广告链接" width="160" align="center">
+                    <template slot-scope="scope">{{scope.row.url}}</template>
                 </el-table-column>
                 <el-table-column label="广告图片" width="160" align="center">
                     <template slot-scope="scope">
-                        <img style="height: 80px" :src="scope.row.pic" />
+                        <img style="width: 90px;" :src="scope.row.content" />
                     </template>
                 </el-table-column>
-                <el-table-column label="时间" width="220" align="center">
+                <el-table-column label="时间" width="240" align="center">
                     <template slot-scope="scope">
-                        <p>开始时间：{{scope.row.startTime | formatTime}}</p>
-                        <p>到期时间：{{scope.row.endTime | formatTime}}</p>
+                        <p>开始时间：{{scope.row.stime | formatTimes}}</p>
+                        <p>到期时间：{{scope.row.etime | formatTimes}}</p>
                     </template>
                 </el-table-column>
-                <el-table-column label="上线/下线" width="120" align="center">
-                    <template slot-scope="scope">
-                        <el-switch
-                            @change="handleUpdateStatus(scope.$index, scope.row)"
-                            :active-value="1"
-                            :inactive-value="0"
-                            v-model="scope.row.status"
-                        ></el-switch>
-                    </template>
+                <el-table-column label="排序" width="80" align="center">
+                    <template slot-scope="scope">{{scope.row.sort}}</template>
                 </el-table-column>
                 <el-table-column label="操作" width="120" align="center">
                     <template slot-scope="scope">
@@ -114,93 +110,128 @@
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 layout="total, sizes,prev, pager, next,jumper"
-                :page-size="listQuery.pageSize"
+                :page-size="listQuery.size"
                 :page-sizes="[5,10,15]"
-                :current-page.sync="listQuery.pageNum"
+                :current-page.sync="listQuery.page"
                 :total="total"
             ></el-pagination>
         </div>
     </div>
 </template>
 <script>
-import { formatDate } from "@/util/date";
-const defaultListQuery = {
-    pageNum: 1,
-    pageSize: 5,
-    name: null,
-    type: null,
-    endTime: null
-};
-const defaultTypeOptions = [
-    {
-        label: "大首页轮播",
-        value: 0
-    },
-    {
-        label: "商城首页轮播",
-        value: 1
-    }
-];
+import { formatTime } from "@/util/datas";
+import { getAdList, getAdTypeList, delAdInfo } from "@/api/ad";
 export default {
     name: "adList",
     data() {
         return {
-            listQuery: Object.assign({}, defaultListQuery),
-            typeOptions: Object.assign({}, defaultTypeOptions),
-            list: [
+            listQuery: {
+                aid: 1,
+                page: 1,
+                size: 10,
+                status: 3
+            },
+            typeOptions: [],
+            statusOptions: [
+                {
+                    id: 3,
+                    name: "全部"
+                },
+                {
+                    id: 0,
+                    name: "未开始"
+                },
                 {
                     id: 1,
-                    name: "banner1",
-                    type: 1,
-                    pic: "",
-                    startTime: "",
-                    endTime: "",
-                    status: 1
+                    name: "已开始"
+                },
+                {
+                    id: 2,
+                    name: "已过期"
                 }
             ],
+            list: [],
             listLoading: false,
             total: 30
         };
     },
-    created() {},
+    created() {
+        this.getAdList();
+        this.getList();
+    },
     methods: {
+        //获取广告位列表
+        getAdList() {
+            getAdTypeList({ page: 1, size: 100 }).then(res => {
+                this.typeOptions = res.data.list;
+            });
+        },
+
+        // 获取广告列表
+        getList() {
+            this.listLoading = true;
+            getAdList(this.listQuery).then(res => {
+                this.list = res.data.list;
+                this.total = res.data.total;
+                this.listLoading = false;
+            });
+        },
         //筛选
-        handleSearchList() {},
+        handleSearchList() {
+            this.getList();
+        },
         //重置
-        handleResetSearch() {},
+        handleResetSearch() {
+            this.listQuery.aid = 1;
+            this.listQuery.page = 1;
+            this.listQuery.size = 10;
+            this.listQuery.status = 3;
+            this.getList();
+        },
         //添加广告
         handleAdd() {
             this.$router.push("/sms/ad/index/detail");
         },
         //table事件
         handleSelectionChange() {},
-        //广告上下线切换
-        handleUpdateStatus() {},
+
         //列表编辑
         handleUpdate(index, row) {
             this.$router.push("/sms/ad/index/detail?id=" + row.id);
         },
         //列表删除
-        handleDelete(index, row) {},
+        handleDelete(index, row) {
+            let _self = this;
+            this.$confirm("此操作将永久删除该广告, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(() => {
+                delAdInfo({ id: row.id }).then(res => {
+                    _self.$message.success("删除成功");
+                    _self.getList();
+                });
+            });
+        },
         //翻页选择
-        handleSizeChange(val) {},
+        handleSizeChange(val) {
+            this.listQuery.size = val;
+            this.listQuery.page = 1;
+            this.getList();
+        },
         //页码切换
-        handleCurrentChange(val) {}
+        handleCurrentChange(val) {
+            this.listQuery.page = val;
+            this.getList();
+        }
     },
     filters: {
-        formatType(type) {
-            if (type === 1) {
-                return "大首页轮播";
-            } else {
-                return "商城首页轮播";
-            }
-        },
-        formatTime(time) {
+        formatTimes(time) {
             if (time == null || time === "") {
                 return "N/A";
             }
             let date = new Date(time);
-            return formatDate(date, "yyyy-MM-dd hh:mm:ss");
+            return formatTime(time);
         }
     }
 };

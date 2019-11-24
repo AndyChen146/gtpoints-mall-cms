@@ -49,6 +49,7 @@ import usersRecharge from '@/view/user/recharge.vue'
 //广告
 import adList from '@/view/ad/index.vue'
 import adDetail from '@/view/ad/detail.vue'
+import adTypeList from '@/view/adtype/index.vue'
 
 //营销-积分夺宝
 import marketStoreList from '@/view/market/store/index.vue'
@@ -273,11 +274,18 @@ const router = new Router({
                     component: marketPanicInfo
                 },
                 {
+                    path: 'ad/type/index',
+                    name: 'adTypeList',
+                    meta: { title: '广告位列表', icon: 'product-list' },
+                    component: adTypeList
+                },
+                {
                     path: 'ad/index',
                     name: 'adList',
                     meta: { title: '广告列表', icon: 'product-list' },
                     component: adList
                 },
+
                 {
                     path: 'ad/index/detail',
                     name: 'adDetail',
@@ -299,8 +307,10 @@ const router = new Router({
                     component: marketBluePrintInfo
                 }
             ]
-        }
+        },
+        { path: '*', redirect: '/404', hidden: true }
     ]
+
 })
 
 router.beforeEach((to, from, next) => {  //注册一个全局前置守卫

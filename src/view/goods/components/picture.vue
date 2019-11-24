@@ -1,8 +1,11 @@
 <template>
-    <div>商品相册</div>
+    <div></div>
 </template>
 <script>
+import MultiUpload from "@/components/util/Upload/multiUpload";
 export default {
-    name: "GoodsPicture"
+    name: "GoodsPicture",
+    components: { MultiUpload },
+    computed: {}
 };
 </script>

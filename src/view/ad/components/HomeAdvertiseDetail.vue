@@ -7,53 +7,41 @@
             label-width="150px"
             size="small"
         >
-            <el-form-item label="广告名称：" prop="name">
-                <el-input v-model="homeAdvertise.name" class="input-width"></el-input>
+            <el-form-item label="广告名称：" prop="title">
+                <el-input v-model="homeAdvertise.title" class="input-width"></el-input>
             </el-form-item>
-            <el-form-item label="广告位置：">
-                <el-select v-model="homeAdvertise.type">
+            <el-form-item label="广告位置：" prop="aid">
+                <el-select v-model="homeAdvertise.aid">
                     <el-option
                         v-for="type in typeOptions"
-                        :key="type.value"
-                        :label="type.label"
-                        :value="type.value"
+                        :key="type.aid"
+                        :label="type.name"
+                        :value="type.aid"
                     ></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="开始时间：" prop="startTime">
-                <el-date-picker
-                    type="datetime"
-                    placeholder="选择日期"
-                    v-model="homeAdvertise.startTime"
-                ></el-date-picker>
+            <el-form-item label="开始时间：" prop="stime">
+                <el-date-picker type="datetime" placeholder="选择日期" v-model="homeAdvertise.stime"></el-date-picker>
             </el-form-item>
-            <el-form-item label="到期时间：" prop="endTime">
-                <el-date-picker type="datetime" placeholder="选择日期" v-model="homeAdvertise.endTime"></el-date-picker>
+            <el-form-item label="结束时间：" prop="etime">
+                <el-date-picker type="datetime" placeholder="选择日期" v-model="homeAdvertise.etime"></el-date-picker>
             </el-form-item>
-            <el-form-item label="上线/下线：">
+            <!-- <el-form-item label="上线/下线：">
                 <el-radio-group v-model="homeAdvertise.status">
                     <el-radio :label="0">下线</el-radio>
                     <el-radio :label="1">上线</el-radio>
                 </el-radio-group>
+            </el-form-item>-->
+            <el-form-item label="广告链接：" prop="url">
+                <el-input v-model="homeAdvertise.url" class="input-width"></el-input>
             </el-form-item>
-            <el-form-item label="广告图片：">
-                <single-upload v-model="homeAdvertise.pic"></single-upload>
+            <el-form-item label="广告图片：" prop="content">
+                <single-upload v-model="homeAdvertise.content"></single-upload>
             </el-form-item>
             <el-form-item label="排序：">
                 <el-input v-model="homeAdvertise.sort" class="input-width"></el-input>
             </el-form-item>
-            <el-form-item label="广告链接：" prop="url">
-                <el-input v-model="homeAdvertise.url" class="input-width"></el-input>
-            </el-form-item>
-            <el-form-item label="广告备注：">
-                <el-input
-                    class="input-width"
-                    type="textarea"
-                    :rows="5"
-                    placeholder="请输入内容"
-                    v-model="homeAdvertise.note"
-                ></el-input>
-            </el-form-item>
+
             <el-form-item>
                 <el-button type="primary" @click="onSubmit('homeAdvertiseFrom')">提交</el-button>
                 <el-button @click="resetForm()">返回</el-button>
@@ -63,16 +51,8 @@
 </template>
 <script>
 import SingleUpload from "@/components/util/Upload/singleUpload";
-const defaultTypeOptions = [
-    {
-        label: "大首页轮播",
-        value: 0
-    },
-    {
-        label: "商城首页轮播",
-        value: 1
-    }
-];
+import { getAdInfo, updataAdInfo, getAdTypeList } from "@/api/ad";
+import { formatTime } from "@/util/datas";
 export default {
     name: "HomeAdvertiseDetail",
     components: { SingleUpload },
@@ -85,17 +65,16 @@ export default {
     data() {
         return {
             homeAdvertise: {
-                name: "",
-                type: 1,
-                startTime: "",
-                endTime: "",
-                status: 1,
-                sort: 1,
+                title: "",
+                aid: "",
+                stime: "",
+                etime: "",
+                sort: "",
                 url: "",
-                note: ""
+                content: ""
             },
             rules: {
-                name: [
+                title: [
                     {
                         required: true,
                         message: "请输入广告名称",
@@ -108,6 +87,13 @@ export default {
                         trigger: "blur"
                     }
                 ],
+                aid: [
+                    {
+                        required: true,
+                        message: "请选择广告位",
+                        trigger: "blur"
+                    }
+                ],
                 url: [
                     {
                         required: true,
@@ -115,21 +101,21 @@ export default {
                         trigger: "blur"
                     }
                 ],
-                startTime: [
+                stime: [
                     {
                         required: true,
                         message: "请选择开始时间",
                         trigger: "blur"
                     }
                 ],
-                endTime: [
+                etime: [
                     {
                         required: true,
                         message: "请选择到期时间",
                         trigger: "blur"
                     }
                 ],
-                pic: [
+                content: [
                     {
                         required: true,
                         message: "请选择广告图片",
@@ -137,10 +123,35 @@ export default {
                     }
                 ]
             },
-            typeOptions: Object.assign({}, defaultTypeOptions)
+            typeOptions: []
         };
     },
+    created() {
+        this.getAdList();
+        let id = this.$route.query.id;
+        if (id) {
+            this.getInfo(id);
+        }
+    },
     methods: {
+        //获取广告详情
+        getInfo(id) {
+            getAdInfo({ id: id }).then(res => {
+                this.homeAdvertise.title = res.data.title;
+                this.homeAdvertise.aid = res.data.aid;
+                this.homeAdvertise.stime = formatTime(res.data.stime);
+                this.homeAdvertise.etime = formatTime(res.data.etime);
+                this.homeAdvertise.url = res.data.url;
+                this.homeAdvertise.content = res.data.content;
+                this.homeAdvertise.sort = res.data.sort;
+            });
+        },
+        //获取广告位列表
+        getAdList() {
+            getAdTypeList({ page: 1, size: 100 }).then(res => {
+                this.typeOptions = res.data.list;
+            });
+        },
         //返回
         resetForm() {
             this.$router.push("/sms/ad/index");
@@ -149,8 +160,24 @@ export default {
         onSubmit(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                } else {
+                    this.homeAdvertise.stime =
+                        new Date(this.homeAdvertise.stime).getTime() / 1000;
+                    this.homeAdvertise.etime =
+                        new Date(this.homeAdvertise.etime).getTime() / 1000;
+                    if (this.$route.query.id) {
+                        this.homeAdvertise.id = this.$route.query.id;
+                        this.UpdateFormData(this.homeAdvertise);
+                    } else {
+                        this.UpdateFormData(this.homeAdvertise);
+                    }
                 }
+            });
+        },
+        //服务端数据api提交
+        UpdateFormData(obj) {
+            updataAdInfo(obj).then(res => {
+                this.$message.success("操作成功！");
+                this.$router.push("/sms/ad/index");
             });
         }
     }

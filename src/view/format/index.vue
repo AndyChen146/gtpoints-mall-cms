@@ -82,9 +82,11 @@ export default {
     methods: {
         //初始化商品规格列表
         getList() {
+            this.listLoading = true;
             getFormatList(this.listQuery).then(res => {
                 this.total = res.data.total;
                 this.list = res.data.list;
+                this.listLoading = false;
             });
         },
         //添加

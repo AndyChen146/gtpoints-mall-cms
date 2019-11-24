@@ -94,9 +94,11 @@ export default {
     methods: {
         //获取品牌列表
         getList() {
+            this.listLoading = true;
             getBrandsList(this.listQuery).then(res => {
                 this.list = res.data.list;
                 this.total = res.data.total;
+                this.listLoading = false;
             });
         },
 

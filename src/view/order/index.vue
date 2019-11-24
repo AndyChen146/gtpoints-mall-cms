@@ -199,7 +199,7 @@
     </div>
 </template>
 <script>
-import { formatdate } from "@/util/date";
+import { formatdate } from "@/util/datas";
 import LogisticsDialog from "@/view/order/components/logisticsDialog";
 const defaultLogisticsCompanies = [
     "顺丰快递",

@@ -110,7 +110,7 @@
     </div>
 </template>
 <script>
-import { formatdate } from "@/util/date.js";
+import { formatdate } from "@/util/datas.js";
 export default {
     name: "",
     data() {

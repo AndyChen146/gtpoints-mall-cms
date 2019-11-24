@@ -71,8 +71,10 @@ export default {
     methods: {
         //获取分类列表
         getList() {
+            this.listLoading = true;
             getCateList(this.listQuery).then(res => {
                 this.list = res.data.list;
+                this.listLoading = false;
             });
         },
 

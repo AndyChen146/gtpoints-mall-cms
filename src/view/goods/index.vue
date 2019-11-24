@@ -97,7 +97,7 @@
                                 @change="handlePublishStatusChange(scope.$index, scope.row)"
                                 :active-value="1"
                                 :inactive-value="0"
-                                v-model="scope.row.publishStatus"
+                                v-model="scope.row.status"
                             ></el-switch>
                         </p>
                         <p>
@@ -155,15 +155,16 @@
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 layout="total, sizes,prev, pager, next,jumper"
-                :page-size="listQuery.pageSize"
+                :page-size="listQuery.size"
                 :page-sizes="[5,10,20]"
-                :current-page.sync="listQuery.pageNum"
+                :current-page.sync="listQuery.page"
                 :total="total"
             ></el-pagination>
         </div>
     </div>
 </template>
 <script>
+import { getGoodsList } from "@/api/goods";
 export default {
     name: "",
     data() {
@@ -187,11 +188,11 @@ export default {
                 }
             ],
             listQuery: {
-                pageNum: 1,
-                pageSize: 10,
+                page: 1,
+                size: 10,
                 keyword: "",
                 brandId: "",
-                publishStatus: ""
+                status: ""
             },
             selectProductCateValue: null, //初始化商品分类值
             productCateOptions: [], //商品分类数组
@@ -208,8 +209,17 @@ export default {
             ]
         };
     },
-    created() {},
+    created() {
+        this.getList();
+    },
     methods: {
+        //获取商品列表
+        getList() {
+            getGoodsList(this.listQuery).then(res => {
+                console.log(res);
+            });
+        },
+
         //搜索查询
         handleSearchList() {},
         // 重置
