@@ -19,14 +19,25 @@ export default {
     name: "GoodsDetail",
     components: { VueEditor },
     props: {
-        values: Object
+        value: String,
+        default: ""
+    },
+    computed: {
+        content: {
+            get() {
+                return this.value;
+            },
+            set(value) {
+                this.$emit("input", value);
+            }
+        }
     },
     data() {
         return {
-            content: "",
             loading: false,
             customToolbar: [
                 //更多工具栏选项在下面
+                [{ header: [false, 1, 2, 3, 4, 5, 6] }],
                 ["bold", "italic", "underline"],
                 [{ align: "" }, { align: "center" }, { align: "right" }],
                 [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],

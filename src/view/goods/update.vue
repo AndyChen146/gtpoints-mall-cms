@@ -146,7 +146,7 @@
                 <multi-upload v-model="selectProductPics"></multi-upload>
             </el-tab-pane>
             <el-tab-pane label="商品详情" name="five">
-                <goods-detail></goods-detail>
+                <goods-detail v-model="params.description"></goods-detail>
             </el-tab-pane>
         </el-tabs>
         <div class="bottom">
@@ -190,20 +190,20 @@ export default {
                 for (let i = 0; i < albumPics.length; i++) {
                     pics.push(albumPics[i]);
                 }
-
                 return pics;
             },
             set: function(newValue) {
                 if (newValue == null || newValue.length === 0) {
                     this.params.picture = null;
                 } else {
-                    this.params.picture = "";
-                    if (newValue.length > 1) {
+                    //console.log(newValue);
+                    //this.params.picture = "";
+                    if (newValue.length > 0) {
                         for (let i = 1; i < newValue.length; i++) {
                             this.params.picture += newValue[i];
-                            if (i !== newValue.length - 1) {
-                                this.params.picture += ",";
-                            }
+                            // if (i !== newValue.length - 1) {
+                            //     this.params.picture += ",";
+                            // }
                         }
                     }
                 }

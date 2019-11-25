@@ -7,7 +7,6 @@
             :file-list="fileList"
             :before-upload="beforeUpload"
             :on-remove="handleRemove"
-            :on-success="handleUploadSuccess"
             :limit="maxCount"
             accept="image/jpg, image/png, image/jpeg"
             :on-preview="handlePreview"
@@ -87,6 +86,12 @@ export default {
                 uploadImage(uploadData)
                     .then(response => {
                         _self.dataObj.url = response.data.pic_url;
+                        _self.fileList.push({
+                            name: file.name,
+                            url: _self.dataObj.url
+                        });
+                        _self.emitInput(_self.fileList);
+                        console.log(_self.fileList);
                         resolve(true);
                     })
                     .catch(err => {
@@ -95,13 +100,7 @@ export default {
                     });
             });
         },
-        handleUploadSuccess(res, file) {
-            this.fileList.push({
-                name: file.name,
-                url: this.dataObj.url
-            });
-            this.emitInput(this.fileList);
-        },
+        handleUploadSuccess(res, file) {},
         handleExceed(files, fileList) {
             this.$message({
                 message: "最多只能上传" + this.maxCount + "张图片",
