@@ -3,7 +3,7 @@
         <el-row :gutter="20" class="elrow">
             <el-col :span="3" class="left-name">商品规格：</el-col>
             <el-col :span="14">
-                <el-select placeholder="请选择规格" @change="onchangeFormat" v-model="goods_format_id">
+                <el-select placeholder="请选择规格" @change="onchangeFormat" v-model="goods_spec_id">
                     <el-option
                         v-for="item in formatlist"
                         :value="item.spec_id"
@@ -12,14 +12,14 @@
                     ></el-option>
                 </el-select>
             </el-col>
-            <el-col class="format-del" :span="2" v-if="goods_format.goods_spec_items.length>0">
+            <el-col class="format-del" :span="2" v-if="goods_spec.goods_spec_items.length>0">
                 <el-button type="primary" @click="refreshSkuList">
                     <i class="el-icon-refresh"></i> 刷新SKU列表
                 </el-button>
             </el-col>
         </el-row>
         <el-row
-            v-for="(item,index) in goods_format.goods_spec_items"
+            v-for="(item,index) in goods_spec.goods_spec_items"
             :key="item.spec_id"
             :gutter="20"
             class="elrow format"
@@ -27,9 +27,9 @@
         >
             <el-col :span="3" class="left-name">{{item.name}}：</el-col>
             <el-col :span="10">
-                <el-checkbox-group v-model="item.values" @change="checkboxValue(index)">
+                <el-checkbox-group v-model="item.value" @change="checkboxValue(index)">
                     <el-checkbox
-                        v-for="(vx,vindex) in item.value"
+                        v-for="(vx,vindex) in item.values"
                         :value="vindex"
                         :key="vindex"
                         :label="vx.spec_value_name"
@@ -45,11 +45,11 @@
             <el-table
                 style="width: 100%;margin-top: 20px;"
                 height="500"
-                :data="goods_format.goods_sku_items"
+                :data="goods_spec.goods_sku_items"
                 border
             >
                 <el-table-column
-                    v-for="(item,index) in goods_format.goods_spec_items"
+                    v-for="(item,index) in goods_spec.goods_spec_items"
                     :label="item.name"
                     :key="item.id"
                     align="center"
@@ -61,11 +61,11 @@
                         <el-input v-model="scope.row.price" placeholder="必填"></el-input>
                     </template>
                 </el-table-column>
-                <el-table-column label="促销价" width="140" align="center">
+                <!-- <el-table-column label="促销价" width="140" align="center" style="display:none">
                     <template slot-scope="scope">
                         <el-input v-model="scope.row.promote_price" placeholder="必填"></el-input>
                     </template>
-                </el-table-column>
+                </el-table-column>-->
                 <el-table-column label="库存" width="140" align="center">
                     <template slot-scope="scope">
                         <el-input v-model="scope.row.stock" placeholder="必填"></el-input>
@@ -77,27 +77,73 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="图片" align="center">
-                    <template slot-scope="scope">上传</template>
+                    <template slot-scope="scope">
+                        <el-button
+                            type="text"
+                            v-if="scope.row.picture.length<=1"
+                            @click="uploadImg(scope.row, scope.$index)"
+                            class="scope_btn"
+                        >上传</el-button>
+                        <el-button
+                            type="text"
+                            v-if="scope.row.picture.length>1"
+                            @click="viewProductImg(scope.row.picture,scope.$index)"
+                            class="scope_btn"
+                        >查看</el-button>
+                        <el-button
+                            type="text"
+                            v-if="scope.row.picture.length>1"
+                            @click="delProductImg(scope.row.picture,scope.$index)"
+                            class="scope_btn"
+                        >删除</el-button>
+                    </template>
                 </el-table-column>
             </el-table>
         </el-row>
+        <el-dialog :visible.sync="dialogVisibleBool" size="tiny">
+            <img width="100%" :src="dialogImageUrl" alt />
+        </el-dialog>
+        <uploadImage ref="tk" :pas="goodsImagesItem" @uploadFun="getuploadFun"></uploadImage>
     </div>
 </template>
 <script>
+import uploadImage from "./uploadImage.vue";
 import { getFormatList, getFormatInfo } from "@/api/format";
 export default {
     name: "GoodsFormat",
+    components: {
+        uploadImage
+    },
+    props: {
+        value: Object
+    },
+    computed: {
+        goods_spec: {
+            get() {
+                return this.value;
+            },
+            set(value) {
+                this.$emit("input", value);
+            }
+        }
+    },
     data() {
         return {
-            goods_format: {
-                goods_spec_items: [],
-                goods_spec_picture_items: [],
-                goods_sku_items: []
-            },
-            goods_format_id: "",
+            // goods_spec: {
+            //     goods_spec_items: [],
+            //     goods_spec_picture_items: [],
+            //     goods_sku_items: []
+            // },
+            goods_spec_id: "",
             formatlist: [],
             skuStockList: [],
-            selectProductAttr: []
+            selectProductAttr: [],
+            dialogImageUrl: "",
+            dialogVisibleBool: false,
+            goodsImagesItem: {
+                item: "",
+                index: ""
+            }
         };
     },
     created() {
@@ -116,22 +162,20 @@ export default {
         },
         //商品规格选择
         onchangeFormat(value) {
-            this.goods_format_id = value;
-            if (this.goods_format.goods_spec_items.length > 0) {
+            this.goods_spec_id = value;
+            if (this.goods_spec.goods_spec_items.length > 0) {
                 for (
                     var i = 0;
-                    i < this.goods_format.goods_spec_items.length;
+                    i < this.goods_spec.goods_spec_items.length;
                     i++
                 ) {
-                    if (
-                        this.goods_format.goods_spec_items[i].spec_id == value
-                    ) {
+                    if (this.goods_spec.goods_spec_items[i].spec_id == value) {
                         this.$message.error("请勿添加相同的规格");
                         return false;
                     }
                 }
             }
-            if (this.goods_format.goods_spec_items.length >= 3) {
+            if (this.goods_spec.goods_spec_items.length >= 3) {
                 return this.$message.error("单个商品最多只能添加3个规格");
             }
             getFormatInfo({ spec_id: value }).then(res => {
@@ -147,10 +191,10 @@ export default {
                 let obj = {
                     name: res.data.name,
                     spec_id: res.data.spec_id,
-                    values: v_items,
-                    value: v_items_array
+                    value: v_items,
+                    values: v_items_array
                 };
-                this.goods_format.goods_spec_items.push(obj);
+                this.goods_spec.goods_spec_items.push(obj);
             });
         },
         //删除选择规格
@@ -161,16 +205,15 @@ export default {
                 type: "warning"
             })
                 .then(() => {
-                    this.goods_format.goods_spec_items.splice(index, 1);
+                    this.goods_spec.goods_spec_items.splice(index, 1);
                 })
                 .catch(() => {});
         },
         checkboxValue(index) {
             //console.log(index);
-            console.log(this.goods_format.goods_spec_items[index]);
+            // console.log(this.goods_spec.goods_spec_items[index]);
         },
         getProductSkuSp(row, index) {
-            console.log(row);
             if (index === 0) {
                 return row.sp0;
             } else if (index === 1) {
@@ -181,7 +224,10 @@ export default {
         },
         //刷新sku列表
         refreshSkuList() {
-            if (this.goods_format.goods_sku_items.length > 0) {
+            if (
+                this.goods_spec.goods_sku_items &&
+                this.goods_spec.goods_sku_items.length > 0
+            ) {
                 this.$confirm(
                     "刷新列表将导致sku信息重新生成，如要刷新提前做好备份！, 是否继续?",
                     "提示",
@@ -200,34 +246,44 @@ export default {
             }
         },
         refreshProductSkuList() {
-            this.goods_format.goods_sku_items = [];
-            let skuList = this.goods_format.goods_sku_items;
-            let list = this.goods_format.goods_spec_items;
+            this.goods_spec.goods_sku_items = [];
+            let skuList = this.goods_spec.goods_sku_items;
+            let list = this.goods_spec.goods_spec_items;
             //只有一个属性时
             if (list.length === 1) {
-                let values = list[0].values;
+                let values = list[0].value;
+                let names = list[0].name;
+                let spec_id = list[0].spec_id;
                 for (let i = 0; i < values.length; i++) {
                     skuList.push({
                         sku_name: "",
-                        attr_value_items: "",
-                        price: "",
-                        promote_price: "",
+                        attr_value_items: spec_id + ":" + i,
+                        sku_name: names + ":" + values[i],
+                        price: "0.00",
+                        promote_price: "0.00",
                         stock: "0",
                         merchant_code: "",
+                        picture: "",
                         sp0: values[i]
                     });
                 }
             } else if (list.length === 2) {
-                let values0 = list[0].values;
-                let values1 = list[1].values;
+                let values0 = list[0].value;
+                let values1 = list[1].value;
+                let names0 = list[0].name;
+                let spec_id0 = list[0].spec_id;
+                let names1 = list[1].name;
+                let spec_id1 = list[1].spec_id;
                 for (let i = 0; i < values0.length; i++) {
                     if (values1.length === 0) {
                         skuList.push({
                             sku_name: "",
-                            attr_value_items: "",
-                            price: "",
-                            promote_price: "",
+                            attr_value_items: spec_id0 + ":" + i,
+                            sku_name: names0 + ":" + values0[i],
+                            price: "0.00",
+                            promote_price: "0.00",
                             stock: "0",
+                            picture: "",
                             merchant_code: "",
                             sp0: values0[i]
                         });
@@ -237,9 +293,20 @@ export default {
                         skuList.push({
                             sku_name: "",
                             attr_value_items: "",
-                            price: "",
-                            promote_price: "",
+                            attr_value_items:
+                                spec_id0 + ":" + i + ";" + spec_id1 + ":" + j,
+                            sku_name:
+                                names0 +
+                                ":" +
+                                values0[i] +
+                                ";" +
+                                names1 +
+                                ":" +
+                                values1[j],
+                            price: "0.00",
+                            promote_price: "0.00",
                             stock: "0",
+                            picture: "",
                             merchant_code: "",
                             sp0: values0[i],
                             sp1: values1[j]
@@ -247,17 +314,27 @@ export default {
                     }
                 }
             } else {
-                let values0 = list[0].values;
-                let values1 = list[1].values;
-                let values2 = list[2].values;
+                let values0 = list[0].value;
+                let names0 = list[0].name;
+                let spec_id0 = list[0].spec_id;
+                let values1 = list[1].value;
+                let names1 = list[1].name;
+                let spec_id1 = list[1].spec_id;
+                let values2 = list[2].value;
+                let names2 = list[2].name;
+                let spec_id2 = list[2].spec_id;
                 for (let i = 0; i < values0.length; i++) {
                     if (values1.length === 0) {
                         skuList.push({
                             sku_name: "",
-                            attr_value_items: "",
-                            price: "",
-                            promote_price: "",
+
+                            attr_value_items: spec_id0 + ":" + i,
+                            sku_name: names0 + ":" + values0[i],
+
+                            price: "0.00",
+                            promote_price: "0.00",
                             stock: "0",
+                            picture: "",
                             merchant_code: "",
                             sp0: values0[i]
                         });
@@ -267,10 +344,27 @@ export default {
                         if (values2.length === 0) {
                             skuList.push({
                                 sku_name: "",
-                                attr_value_items: "",
-                                price: "",
-                                promote_price: "",
+                                attr_value_items:
+                                    spec_id0 +
+                                    ":" +
+                                    i +
+                                    ";" +
+                                    spec_id1 +
+                                    ":" +
+                                    j,
+                                sku_name:
+                                    names0 +
+                                    ":" +
+                                    values0[i] +
+                                    ";" +
+                                    names1 +
+                                    ":" +
+                                    values1[j],
+
+                                price: "0.00",
+                                promote_price: "0.00",
                                 stock: "0",
+                                picture: "",
                                 merchant_code: "",
                                 sp0: values0[i],
                                 sp1: values1[j]
@@ -280,10 +374,34 @@ export default {
                         for (let k = 0; k < values2.length; k++) {
                             skuList.push({
                                 sku_name: "",
-                                attr_value_items: "",
-                                price: "",
-                                promote_price: "",
+                                attr_value_items:
+                                    spec_id0 +
+                                    ":" +
+                                    i +
+                                    ";" +
+                                    spec_id1 +
+                                    ":" +
+                                    j +
+                                    ";" +
+                                    spec_id2 +
+                                    ":" +
+                                    k,
+                                sku_name:
+                                    names0 +
+                                    ":" +
+                                    values0[i] +
+                                    ";" +
+                                    names1 +
+                                    ":" +
+                                    values1[j] +
+                                    ";" +
+                                    names2 +
+                                    ":" +
+                                    values2[k],
+                                price: "0.00",
+                                promote_price: "0.00",
                                 stock: "0",
+                                picture: "",
                                 merchant_code: "",
                                 sp0: values0[i],
                                 sp1: values1[j],
@@ -293,6 +411,32 @@ export default {
                     }
                 }
             }
+        },
+        //sku 图片上传
+        uploadImg(obj, index) {
+            this.goodsImagesItem.item = obj;
+            this.goodsImagesItem.index = index;
+            this.$refs.tk.openDialog();
+        },
+        // 查看sku商品属性对应的图片
+        viewProductImg(url, index) {
+            this.dialogImageUrl = url;
+            this.dialogVisibleBool = true;
+        },
+        // 删除商品属性对应的图片
+        delProductImg(url, index) {
+            this.$confirm("确定删除上传好的商品属性图片？", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(() => {
+                this.goods_spec.goods_sku_items[index].imgurl = "";
+            });
+        },
+        //接收商品属性上传图片的数据
+        getuploadFun(data) {
+            //this.tableData[data.index].imgurl = data.imageUrl;
+            this.goods_spec.goods_sku_items[data.index].picture = data.imageUrl;
         }
     }
 };

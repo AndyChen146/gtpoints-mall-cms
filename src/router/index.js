@@ -36,6 +36,9 @@ import formatDetail from '@/view/format/detail.vue'
 import protypeList from '@/view/protype/index.vue'
 import protypeDetail from '@/view/protype/detail.vue'
 
+//商品评价
+import assessList from '@/view/assess/index.vue'
+
 //订单
 import orderList from '@/view/order/index.vue'
 import orderInfo from '@/view/order/detail.vue'
@@ -127,6 +130,13 @@ const router = new Router({
                     name: 'goodsUpdate',
                     meta: { title: '添加商品', icon: 'product-add' },
                     component: goodsUpdate,
+                },
+                {
+                    path: 'product/assess',
+                    name: 'assessList',
+                    hidden: true,
+                    meta: { title: '评价列表' },
+                    component: assessList,
                 },
                 {
                     path: 'proattr',
@@ -242,6 +252,34 @@ const router = new Router({
             ]
         },
         {
+            path: '/ad',
+            component: Layout,
+            redirect: '/ad/index',
+            name: 'ad',
+            meta: { title: '广告管理', icon: 'ad' },
+            children: [
+                {
+                    path: 'index',
+                    name: 'adList',
+                    meta: { title: '广告列表', icon: 'product-list' },
+                    component: adList
+                },
+                {
+                    path: 'type',
+                    name: 'adTypeList',
+                    meta: { title: '广告位', icon: 'product-cate' },
+                    component: adTypeList
+                },
+                {
+                    path: 'index/detail',
+                    name: 'adDetail',
+                    meta: { title: '广告详情' },
+                    hidden: true,
+                    component: adDetail
+                },
+            ]
+        },
+        {
             path: '/sms',
             name: 'sms',
             component: Layout,
@@ -251,14 +289,15 @@ const router = new Router({
                 {
                     path: 'store/index',
                     name: 'marketStoreList',
-                    meta: { title: '积分夺宝列表', icon: 'market-store' },
+                    meta: { title: '积分夺宝', icon: 'market-store' },
                     component: marketStoreList,
                 },
                 {
                     path: 'store/types',
                     name: 'marketStoreType',
                     meta: { title: '积分夺宝分类', icon: 'product-cate' },
-                    component: marketStoreType
+                    component: marketStoreType,
+                    hidden: true
                 },
                 {
                     path: 'panic/index',
@@ -272,26 +311,6 @@ const router = new Router({
                     meta: { title: '限时免费抢购详情' },
                     hidden: true,
                     component: marketPanicInfo
-                },
-                {
-                    path: 'ad/type/index',
-                    name: 'adTypeList',
-                    meta: { title: '广告位列表', icon: 'product-list' },
-                    component: adTypeList
-                },
-                {
-                    path: 'ad/index',
-                    name: 'adList',
-                    meta: { title: '广告列表', icon: 'product-list' },
-                    component: adList
-                },
-
-                {
-                    path: 'ad/index/detail',
-                    name: 'adDetail',
-                    meta: { title: '广告详情' },
-                    hidden: true,
-                    component: adDetail
                 },
                 {
                     path: 'markblue/index',

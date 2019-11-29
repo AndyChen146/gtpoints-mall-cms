@@ -135,6 +135,10 @@
                             >查看</el-button>
                             <el-button
                                 size="mini"
+                                @click="handleShowAssess(scope.$index, scope.row)"
+                            >评价</el-button>
+                            <el-button
+                                size="mini"
                                 @click="handleUpdateProduct(scope.$index, scope.row)"
                             >编辑</el-button>
                         </p>
@@ -242,6 +246,10 @@ export default {
         handleUpdateProduct(index, obj) {},
         //商品删除
         handleDelete(index, obj) {},
+        //商品评价
+        handleShowAssess(index, obj) {
+            this.$router.push("/pms/product/assess?id=" + obj.goods_id);
+        },
 
         //[5.10.20]切换
         handleSizeChange(val) {

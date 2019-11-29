@@ -52,7 +52,7 @@
                         <el-input
                             v-model="params.price"
                             oninput="value=value.replace(/[^\d.]/g,'')"
-                            placeholder="请输入总库存，如填写商品规格，以规格价格为主！"
+                            placeholder="请输入商品单价，如填写商品规格，以规格价格为主！"
                         ></el-input>
                     </el-col>
                 </el-row>
@@ -140,10 +140,10 @@
                 <goods-attr v-model="goods_type"></goods-attr>
             </el-tab-pane>
             <el-tab-pane label="商品规格" name="third">
-                <goods-format></goods-format>
+                <goods-format v-model="goods_spec"></goods-format>
             </el-tab-pane>
             <el-tab-pane label="商品相册" name="fourth">
-                <multi-upload v-model="selectProductPics"></multi-upload>
+                <goods-picture v-model="picture"></goods-picture>
             </el-tab-pane>
             <el-tab-pane label="商品详情" name="five">
                 <goods-detail v-model="params.description"></goods-detail>
@@ -166,56 +166,28 @@ import MultiUpload from "@/components/util/Upload/multiUpload";
 
 import { getBrandsList } from "@/api/brand";
 import { getCateList } from "@/api/category";
+import { updataGoods } from "@/api/goods";
 
 export default {
     name: "",
     components: {
         GoodsAttr,
         GoodsFormat,
+        GoodsPicture,
         GoodsDetail,
         MultiUpload
     },
-    computed: {
-        selectProductPics: {
-            get: function(val) {
-                let pics = [];
-                if (
-                    this.params.picture === undefined ||
-                    this.params.picture === null ||
-                    this.params.picture === ""
-                ) {
-                    return pics;
-                }
-                let albumPics = this.params.picture.split(",");
-                for (let i = 0; i < albumPics.length; i++) {
-                    pics.push(albumPics[i]);
-                }
-                return pics;
-            },
-            set: function(newValue) {
-                if (newValue == null || newValue.length === 0) {
-                    this.params.picture = null;
-                } else {
-                    //console.log(newValue);
-                    //this.params.picture = "";
-                    if (newValue.length > 0) {
-                        for (let i = 1; i < newValue.length; i++) {
-                            this.params.picture += newValue[i];
-                            // if (i !== newValue.length - 1) {
-                            //     this.params.picture += ",";
-                            // }
-                        }
-                    }
-                }
-            }
-        }
-    },
     data() {
         return {
+            goods_spec: {
+                goods_spec_items: [],
+                goods_sku_items: []
+            },
             goods_type: {
                 goods_type_id: "",
-                goods_type_items: ""
+                goods_type_items: []
             },
+            picture: [],
             params: {
                 title: "",
                 merchant_code: "",
@@ -231,9 +203,8 @@ export default {
                 status: 1,
                 weight: "",
                 goods_unit: "",
-                picture: "",
+                picture: [],
                 goods_spec_items: "",
-                goods_spec_picture_items: "",
                 goods_sku_items: "",
                 sort: ""
             },
@@ -265,8 +236,84 @@ export default {
         },
         //提交保存
         submitSave() {
-            console.log(this.params);
+            if (this.params.title == "") {
+                this.$message.closeAll();
+                return this.$message.error("商品名称不能为空！");
+            } else if (this.params.category_id == "") {
+                this.$message.closeAll();
+                return this.$message.error("请选择商品分类！");
+            } else if (this.params.brand_id == "") {
+                this.$message.closeAll();
+                return this.$message.error("请选择商品品牌！");
+            } else if (this.params.price == "") {
+                this.$message.closeAll();
+                return this.$message.error("商品单价不能为空！");
+            } else if (this.params.stock == "") {
+                this.$message.closeAll();
+                return this.$message.error("商品库存不能为空！");
+            } else if (this.picture.length == 0) {
+                this.$message.closeAll();
+                return this.$message.error("请至少上传一张商品相册图片！");
+            } else if (this.params.description == "") {
+                this.$message.closeAll();
+                return this.$message.error("商品详情不能为空！");
+            } else if (
+                this.goods_spec.goods_spec_items.length > 0 &&
+                this.goods_spec.goods_sku_items.length == 0
+            ) {
+                this.$message.closeAll();
+                return this.$message.error("未刷新SKU列表！");
+            }
+            for (var i in this.goods_spec.goods_sku_items) {
+                var tableSkuItem = this.goods_spec.goods_sku_items[i];
+                for (var key in tableSkuItem) {
+                    if (tableSkuItem["price"] == "") {
+                        this.$message.closeAll();
+                        return this.$message.error("SKU列表中的原价不能为空！");
+                        break;
+                    } else if (tableSkuItem["stock"] == "") {
+                        this.$message.closeAll();
+                        return this.$message.error("SKU列表中的库存不能为空！");
+                        break;
+                    } else if (tableSkuItem["picture"] == "") {
+                        this.$message.closeAll();
+                        return this.$message.error("SKU列表中的图片不能为空！");
+                        break;
+                    }
+                }
+            }
+            let goods_type_items = [];
+            this.goods_type.goods_type_items.forEach(element => {
+                if (element.gtv_type === 3) {
+                    element.gtv_value = element.gtv_value.join(",");
+                }
+                goods_type_items.push(element);
+            });
+
+            this.params.goods_type_id = this.goods_type.goods_type_id;
+            this.params.goods_type_items = goods_type_items;
+            this.params.picture = this.picture.join(",");
+            this.params.goods_sku_items = this.goods_spec.goods_sku_items;
+            this.params.goods_spec_items = this.goods_spec.goods_spec_items;
+
+            if (this.$route.query.id) {
+                this.params.goods_id = this.$route.query.id;
+                //console.log(this.params);
+                this.submitAjax(this.params);
+            } else {
+                this.submitAjax(this.params);
+                //console.log(this.params);
+            }
         },
+        //服务端提交
+        submitAjax(obj) {
+            updataGoods(obj).then(res => {
+                console.log(res);
+                // this.$message.success("操作成功！")
+                // this.$router.push('/pms/product')
+            });
+        },
+
         handleClick(tab, event) {
             //console.log(tab, event);
         }

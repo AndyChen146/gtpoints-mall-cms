@@ -190,14 +190,14 @@ export default {
         },
         //添加广告
         handleAdd() {
-            this.$router.push("/sms/ad/index/detail");
+            this.$router.push("/ad/index/detail");
         },
         //table事件
         handleSelectionChange() {},
 
         //列表编辑
         handleUpdate(index, row) {
-            this.$router.push("/sms/ad/index/detail?id=" + row.id);
+            this.$router.push("/ad/index/detail?id=" + row.id);
         },
         //列表删除
         handleDelete(index, row) {
